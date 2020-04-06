@@ -1,0 +1,59 @@
+<div id="fukuan_update">
+	<div style="padding-left: 5px; padding-top: 5px">
+		<div style="display: flex;justify-content: row;">
+			<table class="table table-bordered" style="width: 500px">
+				<tr>
+					<td>项目</td>
+					<td>数值</td>	
+				</tr>
+
+				<tr>
+					<td>付款ID</td>
+					<td>{$row[0]['fukuan_xt_id']}</td>
+				</tr>
+
+				<tr>
+					<td>日期</td>
+					<td>{$row[0]['fdate']}</td>
+				</tr>
+
+				<tr>
+					<td>供应商</td>
+					<td>{$row[0]['gongys_name']}</td>
+				</tr>
+
+				<tr>
+					<td>摘要</td>
+					<td>{$row[0]['zhaiyao']}</td>
+				</tr>
+
+				<tr>
+					<td>付款类别</td>
+					<td>{$row[0]['shoukleibie']}</td>
+				</tr>
+
+				<tr>
+					<td>实付</td>
+					<td>{$row[0]['shifu']}</td>
+				</tr>
+
+				<tr>
+					<td>折扣</td>
+					<td>{$row[0]['zhekou']}</td>
+				</tr>
+
+				<tr>
+					<td>实付折扣合计</td>
+					<td>{$row[0]['shifu'] + $row[0]['zhekou']}</td>
+				</tr>
+
+				<tr>
+					<td>制单人</td>
+					<td>{$row[0]['username']}</td>
+				</tr>
+			</table>
+
+			<img src="{:url('getval/erweima')}?neirong={$row[0]['fukuan_xt_id']}" style="width: 150px;height: 150px">
+		</div>
+	</div>
+</div>

@@ -1,0 +1,107 @@
+<style>
+	.beijing:hover{
+		color: red;
+	}
+</style>
+<div id="hout_shoukleibie_zhuti">
+	<div style="width: 200px; height: 200px;position: relative;left: 10px; top: 5px">
+		<div class="form-group">
+		    <label >收款类别</label>
+		    <input type="text" class="form-control" id="hout_shoukleibie_name" placeholder="现金/银行/微信">
+		</div>
+
+		<button class="btn btn-primary" style="width: 98%" id="hout_shoukleibie_insert" >新增</button>
+		<input type="hidden" id="hout_shoukleibie_id">
+	</div>
+
+
+	<div style="position: relative; top: -190px; left: 250px; width: 60%;">
+		<table class="table table-bordered">
+			<tr>
+				<th>ID</th>
+				<th>收款类别</th>
+				<th>操作</th>
+			</tr>
+			{volist name="row" id="vo"}
+				<tr class ="update_shoukleibie" id='{$vo.id}'>
+					<td>{$i}</td>
+					<td>{$vo.shoukleibie}</td>
+					<td>
+						<span data-id='{$vo.id}' class="beijing shoukleibie_del glyphicon glyphicon-remove"></span>
+						<span data-id='{$vo.id}' data-name="{$vo.shoukleibie}" class="beijing shoukleibie_xiugai glyphicon glyphicon-pencil" style="margin-left: 10px"></span>
+					</td>
+				</tr>
+			{/volist}
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#hout_shoukleibie_insert').click(function(event) {
+		$(this).attr('disabled', 'disabled');
+		if($(this).text() != '修改'){
+			$(this).attr('disabled', 'disabled');
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/shoukleibie_do")}',
+				data:{
+					shoukleibie: $('#hout_shoukleibie_name').val()
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+					$('#hout_shoukleibie_insert').removeAttr('disabled');
+					$('#hout_shoukleibie_name').val('');
+					var zhuti = $('#hout_shoukleibie_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/shoukleibie")}');
+				}
+			})
+		}else{
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/shoukleibie_update")}',
+				data:{
+					shoukleibie: $('#hout_shoukleibie_name').val(),
+					id: $('#hout_shoukleibie_id').val()
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+					var zhuti = $('#hout_shoukleibie_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/shoukleibie")}');
+
+				}
+			})
+		}
+		
+	});
+
+
+	$('.shoukleibie_del').click(function(event) {
+		var id = $(this).attr('data-id');
+		if(confirm('确认要删除吗？')){
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/shoukleibie_del")}',
+				data:{
+					id: id
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+				}
+			})
+			var zhuti = $('#hout_shoukleibie_zhuti').parent();
+			zhuti.empty();
+			zhuti.load('{:url("Hout/shoukleibie")}');
+		}
+	});
+
+
+	$('.shoukleibie_xiugai').click(function(event) {
+		var id = $(this).attr('data-id');
+		$('#hout_shoukleibie_id').val(id);
+		$('#hout_shoukleibie_name').val($(this).attr('data-name'));
+		$('#hout_shoukleibie_insert').text('修改');
+
+	});
+</script>

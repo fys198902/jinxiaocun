@@ -1,0 +1,94 @@
+<div id="shoukuan_update">
+	<div style="padding-left: 5px; padding-top: 5px">
+		<div style="display: flex;justify-content: row;">
+			<table class="table table-bordered" style="width: 500px">
+				<tr>
+					<td>项目</td>
+					<td>数值</td>	
+				</tr>
+
+				<tr>
+					<td>收款ID</td>
+					<td>{$row[0]['shouk_xt_id']}</td>
+				</tr>
+
+				<tr>
+					<td>日期</td>
+					<td>{$row[0]['fdate']}</td>
+				</tr>
+
+				<tr>
+					<td>客户</td>
+					<td>{$row[0]['kehu_name']}</td>
+				</tr>
+
+				<tr>
+					<td>摘要</td>
+					<td>{$row[0]['zhaiyao']}</td>
+				</tr>
+
+				<tr>
+					<td>收款类别</td>
+					<td>{$row[0]['shoukleibie']}</td>
+				</tr>
+
+				<tr>
+					<td>实收</td>
+					<td>{$row[0]['shishou']}</td>
+				</tr>
+
+				<tr>
+					<td>折扣</td>
+					<td>{$row[0]['zhekou']}</td>
+				</tr>
+
+				<tr>
+					<td>实收折扣合计</td>
+					<td>{$row[0]['shishou'] + $row[0]['zhekou']}</td>
+				</tr>
+				<tr>
+					<td>制单人</td>
+					<td>{$row[0]['username']}</td>
+				</tr>
+			</table>
+
+			<img src="{:url('getval/erweima')}?neirong={$row[0]['shouk_xt_id']}" style="width: 150px;height: 150px">
+		</div>
+
+
+
+		<span>销售单明细</span>
+
+		<div style="width: 99%; overflow-y: autos">
+			<table class="table table-bordered" style="width: 1500px">
+				<tr>
+					<th>ID</th>
+					<th>单据ID</th>
+					<th>日期</th>
+					<th>客户</th>
+					<th>品种</th>
+					<th>单位</th>
+					<th>数量</th>
+					<th>单价</th>
+					<th>金额</th>
+					<th>备注</th>
+				</tr>
+				{volist name="xiaoshoulist" id="vo"}
+					<tr>
+						<td>{$i}</td>
+						<td>{$vo.xiaos_xt_id}</td>
+						<td>{$vo.xiaos_date}</td>
+						<td>{$vo.kehu_name}</td>
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.danw_name}</td>
+						<td>{$vo.shul}</td>
+						<td>{$vo.danj}</td>
+						<td>{$vo.jine}</td>
+						<td>{$vo.beizhu}</td>
+					</tr>
+				{/volist}
+			</table>
+		</div>
+
+	</div>
+</div>

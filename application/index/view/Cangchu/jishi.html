@@ -1,0 +1,48 @@
+<div id="cangchu_jishi" style="margin-left: 10px; margin-top: 10px">
+	<div class="navbar-form navbar-right">
+		<div class="form-group">
+			<input type="text" id="jishi_date" style="width: 150px" class="form-control" value="{$fdate}" placeholder="截止日期">
+		</div>
+
+		<button id="jishi_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+		<button id="jishi_pand_print" class="btn btn-warning" style="margin-left: 8px">盘点表打印</button>
+
+	</div>
+
+
+	<div>
+		<table class="table table-bordered table-striped">
+			<tr>
+				<th>仓库名称</th>
+				<th>物料名称</th>
+				<th>基本数量</th>
+				<th>常用数量</th>
+			</tr>
+
+			{volist name="row" id="vo"}
+				<tr>
+					<td>{$vo.cangk_name}</td>
+					<td>{$vo.wuliao_name}</td>
+					<td>{$vo.jiben}</td>
+					<td>{$vo.jiben/$vo.huansuan|round=2}</td>
+				</tr>
+			{/volist}
+		</table>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+	datelist('jishi_date');
+	
+	$('#jishi_search').click(function(event) {
+		var zhuti = $('#cangchu_jishi').parent();
+		var fdate = $('#jishi_date').val();
+		zhuti.empty();
+		zhuti.load('{:url("Cangchu/jishi")}?fdate=' + fdate);
+	});
+
+	$('#jishi_pand_print').click(function(event) {
+		window.open('{:url("Cangchu/jishi")}?print=1');
+	});
+</script>

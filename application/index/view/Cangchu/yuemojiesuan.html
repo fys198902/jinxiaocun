@@ -1,0 +1,202 @@
+<div id='yuemo' style="margin-left: 10px">
+	<div style="display: flex; justify-content: flex-end; margin-top: 10px">
+		<span style="line-height: 32px; margin-right: 20px"><b>已结账期间：</b>{$lastyue}</span>
+		<input type="text" class="form-control" style="width: 150px; margin-right: 5px;text-align: center;" id="jiesuanyue" placeholder="结算期间" value="{$yuefen}">
+		<button class="btn btn-success" id='chengb_jisuan'>计算</button>
+	</div>
+
+	<div style="margin-top: 10px">
+		<h4>一、上期单位成本</h4>
+			<table class="table">
+				<tr>
+					<td style="width: 60px">ID</td>
+					<td>物料</td>
+					<td style="width: 160px">初期数量-基本</td>
+					<td style="width: 160px">期初金额-基本</td>
+					<td style="width: 160px">期初成本</td>
+				</tr>
+				
+				{volist name="$shangqi" id="vo"}
+					<tr>
+						<td>{$i}</td>
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.shul}</td>
+						<td>{$vo.jine}</td>
+						{if $vo['shul']>0}
+							<td>{$vo.jine/$vo.shul|round=2}</td>
+						{else}
+							<td>-</td>
+						{/if}
+					</tr>
+				{/volist}
+
+			</table>
+		<h4>二、本期购入及单位成本</h4>
+		<table class="table">
+			<tr>
+				<td style="width: 60px">ID</td>
+				<td>物料</td>
+				<td style="width: 160px">本期购入数量-基本</td>
+				<td style="width: 160px">本期购入金额-基本</td>
+				<td style="width: 160px">本期购入-成本价</td>
+			</tr>
+
+			{volist name="$benqi" id="vo"}
+				<tr>
+					<td>{$i}</td>
+					<td>{$vo.wuliao_name}</td>
+					<td>{$vo.gourushul}</td>
+					<td>{$vo.gourujine}</td>
+					{if $vo['gourushul']>0}
+						<td>{$vo.gourujine/$vo.gourushul|round=2}</td>
+					{else}
+						<td>-</td>
+					{/if}
+				</tr>
+			{/volist}
+		</table>
+
+		<h4>三、本期加权后平均单位成本</h4>
+		<table class="table">
+			<tr>
+				<td style="width: 60px">ID</td>
+				<td>物料</td>
+				<td style="width: 160px">合计数量-基本</td>
+				<td style="width: 160px">合计金额-基本</td>
+				<td style="width: 160px">加权成本</td>
+			</tr>
+
+			{volist name="$quanbu" id="vo"}
+				<tr>
+					<td>{$i} <input type="hidden" class="chengb_wuliaoid" value="{$vo.id}"></td>
+					<td>{$vo.wuliao}  <input type="hidden" value="{$vo.wuliao}"></td>
+					<td>{$vo.shul} <input type="hidden" class="chengb_shul" value="{$vo.shul}"></td>
+					<td>{$vo.jine} <input type="hidden" class="chengb_jine" value="{$vo.jine}"></td>
+					{if $vo['shul']>0}
+						<td>{$vo.jine/$vo.shul|round=2}</td>
+					{else}
+						<td>-</td>
+					{/if}
+				</tr>
+			{/volist}
+		</table>
+
+
+		<h4>四、本月实际成本收入及毛利</h4>
+		<table class="table">
+			<tr>
+				<td style="width: 60px">ID</td>
+				<td>物料</td>
+				<td style="width: 100px">单位换算</td>
+				<td>基本数量</td>
+				<td>单位成本</td>
+				<td>成本合计</td>
+				<td>收入合计</td>
+				<td>毛利金额</td>
+			</tr>
+			{volist name="chengben" id="vo"}
+				{php}$zongchengben = $zongchengben + $vo['chengbenjia'];{/php}
+				{php}$zongshouru = $zongshouru + $vo['shouru'];{/php}
+
+				<tr>
+					<td>{$i}</td>
+					<td>{$vo.wuliao}</td>
+					<td>{$vo.huansuan}</td>
+					<td>{$vo.jibenshul}</td>
+					<td>{$vo.danwchengb}</td>
+					<td>{$vo.chengbenjia}</td>
+					<td>{$vo.shouru|round=2}</td>
+					<td>{$vo.shouru - $vo.chengbenjia|round=2}</td>
+				</tr>
+			{/volist}
+			<tr>
+				<td>合计</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>{$zongchengben}</td>
+				<td>{$zongshouru|round=2}</td>
+				<td>{$zongshouru - $zongchengben|round=2}</td>
+			</tr>
+		</table>
+	</div>
+
+	<div style="text-align: center; margin-bottom: 20px">
+		{if $statue}
+			<button class="btn btn-success" style="width: 120px; margin-right: 20px" id="jiezhang">结账</button>
+		{else}
+			<button class="btn btn-warning" style="width: 120px" id="fanjiezhang">反结账</button>
+		{/if}
+		
+	</div>
+</div>
+
+
+<script type="text/javascript">
+	$('#jiesuanyue').datetimepicker({
+		language: "zh-CN",
+		format: 'yyyy-mm',
+		startView: 3,
+		minView: 3,
+		autoclose: true//选择后自动关闭
+	});
+
+	$('#chengb_jisuan').click(function(event) {
+		var zhu = $('#yuemo').parent();
+		var yuefen = $('#jiesuanyue').val();
+		zhu.empty();
+
+		zhu.load('{:url("cangchu/yuemojiesuan")}?yuefen=' + yuefen);
+
+	});
+
+
+	$('#jiezhang').click(function(event) {
+		if($('#jiesuanyue').val() != ''){
+			$.ajax({
+				url: '{:url("Cangchu/jiezhang_do")}',
+				type: 'post',
+				data: {
+					qijian: $('#jiesuanyue').val(),
+					id: getclassval('chengb_wuliaoid'),
+					shul: getclassval('chengb_shul'),
+					jine: getclassval('chengb_jine')
+				},
+				success: function(msg){
+					showtz(msg,'');
+					var zhu = $('#yuemo').parent();
+					var yuefen = $('#jiesuanyue').val();
+					zhu.empty();
+					zhu.load('{:url("cangchu/yuemojiesuan")}?yuefen=' + yuefen);
+				}
+			})
+		}else{
+			showtz('期间不得为空','');
+		}
+		
+	});
+
+
+	$('#fanjiezhang').click(function(event) {
+		if($('#jiesuanyue').val() != ''){
+			$.ajax({
+				url: '{:url("Cangchu/fanjiezhang_do")}',
+				type: 'post',
+				data: {
+					qijian: $('#jiesuanyue').val(),
+				},
+				success: function(msg){
+					showtz(msg,'');
+					var zhu = $('#yuemo').parent();
+					var yuefen = $('#jiesuanyue').val();
+					zhu.empty();
+
+					zhu.load('{:url("cangchu/yuemojiesuan")}?yuefen=' + yuefen);
+				}
+			})
+		}else{
+			showtz('期间不得为空','');
+		}
+	});
+</script>

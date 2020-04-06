@@ -1,0 +1,116 @@
+<div id="taizhang_list" style="margin-left: 10px; margin-top: 10px">
+
+	<div class="navbar-form navbar-right">
+		<div class="form-group">
+			<input type="text" id="taizhang_ksrq" style="width: 150px" class="form-control" value="{$ksrq}" placeholder="开始日期">
+		</div>
+		<div class="form-group">
+			<input type="text" id="taizhang_jsrq" style="width: 150px" class="form-control" value="{$jsrq}" placeholder="结束日期">
+		</div>
+
+		<div class="form-group">
+			<select id="taizhang_pinz" class="form-control">
+				<option value="{$pinz_val}">{$pinz_val}</option>
+				{volist name="pinzhong" id="vo"}
+					<option value="{$vo.wuliao_name}">{$vo.wuliao_name}</option>
+				{/volist}
+			</select>
+		</div>
+
+		<div class="form-group">
+			<select id="taizhang_cangk" class="form-control">
+				<option value="{$cangk_val}">{$cangk_val}</option>
+				{volist name="cangk" id="vo"}
+					<option value="{$vo.cangk_name}">{$vo.cangk_name}</option>
+				{/volist}
+			</select>
+		</div>
+
+
+		<button id="taizhang_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+	</div>
+
+
+
+
+	<div style="overflow-x: auto; width: 99%" id="cangchu_taizhang">
+		<table class="table table-bordered" style="min-width: 1000px">
+			<tr>
+				<th style="width: 120px">单据日期</th>
+				<th style="width: 70px">类别</th>
+				<th style="width: 120px">单据编号</th>	
+				<th>核算项目</th>	
+				<th>物料名称</th>	
+				<th>基本数量</th>	
+				<th>常用数量</th>
+				<th>库存基本</th>
+				<th>库存常用</th>
+				<th>制单人</th>
+			</tr>
+
+			<tr>
+				<td>期初库存</td>
+				<td colspan="5"></td>
+				<td></td>
+				<td>{$qichu}</td>
+				<td>{$qichu_cy}</td>
+			</tr>
+			{php}
+				$kucun=$qichu;
+				$kucun_cy = $qichu_cy;
+			{/php}
+			{volist name="row" id="vo"}
+				{php}$kucun = $vo['shul'] + $kucun;{/php}
+				{php}$kucun_cy = $vo['changyong'] + $kucun_cy;{/php}
+				
+				<tr>
+					<td>{$vo.fdate}</td>
+					<td>{$vo.leibie}</td>
+					<td>{$vo.bianhao}</td>
+					<td style="text-align: left">{$vo.xiangmu}</td>
+					<td>{$vo.wuliao_name}</td>
+					<td>{$vo.shul}</td>
+					<td>{$vo.changyong}</td>
+					<td>{$kucun}</td>
+					<td>{$kucun_cy}</td>
+					<td>{$vo.username}</td>
+				</tr>
+			{/volist}
+
+			<tr>
+				<td>期末库存</td>
+				<td colspan="6"></td>
+				<td>{$qimo}</td>
+				<td>{$qimo_cy}</td>
+				<td></td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	datelist('taizhang_ksrq');
+	datelist('taizhang_jsrq');
+
+
+	$('#cangchu_taizhang .table tr').click(function(event) {
+		$('#cangchu_taizhang .bgcolor').removeClass('bgcolor');
+		$(this).toggleClass('bgcolor');
+	});
+
+
+	$('#taizhang_search').click(function(event) {
+		var zhuti = $('#taizhang_list').parent();
+		var ksrq = $('#taizhang_ksrq').val();
+		var jsrq = $('#taizhang_jsrq').val();
+		var pinzhong = $('#taizhang_pinz').val();
+		var cangk = $('#taizhang_cangk').val();
+		zhuti.empty();
+		zhuti.append('<div class="loading"></div>');
+
+		zhuti.load('{:url("Cangchu/taizhang")}?ksrq=' + ksrq + '&jsrq=' + jsrq + '&pinzhong=' + pinzhong + '&cangk=' + cangk, function(){
+			$('.loading').hide();
+		});
+	});
+
+</script>

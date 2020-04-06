@@ -1,0 +1,117 @@
+<div id="qitashouzhi_list_zhut" style="margin-left: 10px">
+	<div style="width: 99%; text-align: right">
+		<div class="navbar-form navbar-right" role="search">
+			<div class="form-group">
+				<input type="text" id="shouzhi_zhaiyao" style="width: 180px" class="form-control" value="{$zhaiyao}" placeholder="单据ID/摘要">
+			</div>
+			<button id="shouzhi_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+			<button id="shouzhi_del" class="btn btn-warning" style="margin-left: 10px">删除</button>
+			<button id="shouzhi_daochu" class="btn btn-info" style="margin-left: 10px">导出</button>
+		</div>
+		
+	</div>
+
+	<div>
+		<table class="table table-bordered" id="shouzhi_table">
+			<tr>
+				<th style="width: 40px">ID</th>
+				<th style="width: 120px">日期</th>
+				<th style="width: 150px">单据ID</th>
+				<th>摘要</th>
+				<th>类别</th>
+				<th style="width: 80px">收付类别</th>
+				<th style="width: 100px">金额</th>
+				<th style="width: 100px">制单人</th>
+			</tr>
+
+			{volist name="row" id="vo"}
+				<tr id="{$vo.id}">
+					<td>{$i}</td>
+					<td>{$vo.fdate}</td>
+					<td>{$vo.shouz_xt_id}</td>
+					<td style="text-align: left">{$vo.zhaiyao}</td>
+					{if $vo['leibie'] == 0}
+						<td>支出</td>
+					{else/}
+						<td>收入</td>
+					{/if}
+					<td>{$vo.shoukleibie}</td>
+					<td>{$vo.jine}</td>
+					<td>{$vo.username}</td>
+				</tr>
+			{/volist}
+
+			<tr class="shouzhi" style="text-align: center;border: none">
+				<td colspan="8">
+					<ul class="pagination" style="margin: 0px;padding: 0px">
+					<li><a href="#" id="{$shangyiye}">&laquo;</a></li>
+					{for start="$qishiye" end="$jieshuye"}
+						<li {if $i+1==$dangqianye} class="active" {/if}><a href="#" id="{$i+1}">{$i+1}</a></li>
+					{/for}
+					<li><a href="#" id="{$xiayiye}"><span>&raquo;</span></a></li>
+				</ul>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<script type="text/javascript">
+		$('#shouzhi_search').click(function(event) {
+			var zhuti = $('#qitashouzhi_list_zhut').parent();
+			var zhaiyao = $('#shouzhi_zhaiyao').val();
+			zhuti.empty();
+			zhuti.load('{:url("Caiwu/qitashouzhi_list")}?zhaiyao=' + zhaiyao);
+		});
+		
+
+		$('#shouzhi_table tr').click(function(event) {
+			$('.bgcolor').removeClass('bgcolor');
+			$(this).toggleClass('bgcolor');
+		});
+
+
+		$('#shouzhi_table tr').dblclick(function(event) {
+			var shouz_id = $(this).attr('id');
+			var shouz_xt_id = $(this).children('td').eq(2).text();
+			addtabs('list' + (parseInt($('.nav-tabs').children('li').length)+1),shouz_xt_id + '修改','caiwu/qitashouzhi_update?id=' + shouz_id);
+		});
+
+
+		$('#shouzhi_del').click(function(event) {
+			var tr_zhut = $('#shouzhi_table').find('.bgcolor');
+			var id = tr_zhut.attr('id');
+			var xtid = tr_zhut.find('td').eq(2).text();
+			var zhaiyao = $('#shouzhi_zhaiyao').val();
+			var zhuti = $('#qitashouzhi_list_zhut').parent();
+			if(confirm('确定删除' + xtid + '吗？')){
+				zhuti.empty();
+				$.ajax({
+					url: '{:url("caiwu/qitashouzhi_del")}',
+					data:{
+						id: id
+					},
+					success: function(msg){
+						showtz(msg['msg'],'');
+						zhuti.load('{:url("caiwu/qitashouzhi_list")}?zhaiyao=' + zhaiyao);
+					}
+				})
+			}
+		});
+
+
+		$('#shouzhi_daochu').click(function(event) {
+			var zhaiyao = $('#shouzhi_zhaiyao').val();
+			window.location.href = '{:url("caiwu/qitashouzhi_daochu")}?zhaiyao=' + zhaiyao;
+		});
+
+
+		$('.shouzhi .pagination a').click(function(event) {
+			var zhuti = $('#qitashouzhi_list_zhut').parent();
+			var id = $(this).attr('id');
+			var kehu = $('#shouzhi_kehu').val();
+			var zhaiyao = $('#shouzhi_zhaiyao').val();
+			zhuti.empty();
+			zhuti.load("{:url('caiwu/qitashouzhi_list')}?page=" + id + '&zhaiyao=' + zhaiyao);
+		});
+	</script>
+</div>

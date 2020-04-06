@@ -1,0 +1,223 @@
+<style>
+	.glyphicon-remove:hover{
+		color: red;
+	}
+</style>
+<div id="wanglai_shoukuan" style="width: 600px; margin-top: 20px; margin-left: auto; margin-right: auto;">
+	<div>
+		<div class="form-group">
+		    <label for="shoukbianhao">编号</label>
+		    <input type="email" class="form-control" value="{$shouk_xt_id}" readonly="readonly">
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_date">日期</label>
+		    <input type="email" class="form-control" id="wanglai_shouk_date" value="{$fdate}" placeholder="日期">
+		</div>
+		
+		<div class="form-group">
+		    <label for="wanglai_shouk_kehu">客户名称</label>
+		    <input type="email" class="form-control" id="wanglai_shouk_kehu" placeholder="客户名称">
+		    <input type="hidden" id="wanglai_shoukuan_kehuid" value="0">
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_zhaiyao">摘要</label>
+		    <textarea class="form-control" rows="3" id="wanglai_shouk_zhaiyao" placeholder="摘要"></textarea>
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_shishou">按单收款</label>
+		    <input type="text" class="form-control" id="wanglai_danjuid" placeholder="请输入单据ID--非必填">
+		</div>
+
+		<div class="form-group">
+		    <table class="table table-bordered">
+		    	<tr>
+		    		<th>单据ID</th>
+		    		<th>单据金额</th>
+		    		<th>操作</th>
+		    	</tr>
+		    	<tbody id="wanglai_xiaos_id">
+		    		<tr>
+		    			<td>合计</td>
+		    			<td id="xiaoshoujineheji">-</td>
+		    			<td></td>
+		    		</tr>
+		    	</tbody>
+		    </table>
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_shishou">收款类别</label>
+			<select id="wanglai_shouk_shoukleibie" class="form-control">
+					<option value="0"><--请选择--></option>
+				{volist name="leibie" id="vo"}
+					<option value="{$vo.id}">{$vo.shoukleibie}</option>
+				{/volist}
+			</select></span>
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_shishou">实收金额</label>
+		    <input type="text" class="form-control" id="wanglai_shouk_shishou" placeholder="实收金额">
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_shouk_zhekou">折扣金额</label>
+		    <input type="text" class="form-control" id="wanglai_shouk_zhekou" placeholder="折扣金额">
+		</div>
+
+		<button class="btn btn-primary" style="float: right; width: 120px" id="wanglai_shouk_xinzeng">新增</button>
+	</div>
+
+	<script type="text/javascript">
+		datelist('wanglai_shouk_date')
+
+		$('#wanglai_shouk_kehu').focusout(function(event) {
+			if($(this).val() == ''){
+				$('#wanglai_shoukuan_kehuid').val('');
+			}
+		});
+
+		var xiaoshouid = [];
+		var qiuhe = 0;
+		$("#wanglai_danjuid").typeahead({
+		    source: function (query, process) {
+		        return $.ajax({
+		            url: '{:url("Getval/getxiaoshouid")}',
+		            type: 'post',
+		            data: {
+		            	xiaoshouid: query,
+		            	kehuid: $('#wanglai_shoukuan_kehuid').val()
+		            },
+		            success: function (fdata) {
+		                return process(fdata);
+		            }
+		        });
+		    },
+		    items: 3,
+		    showHintOnFocus: true,
+		    afterSelect: function (item) {
+		    	if(xiaoshouid.indexOf(item.name) == -1){
+		    		xiaoshouid.push(item.name)
+			    	$('#wanglai_xiaos_id').prepend('<tr id= xiaos_id_' + item.name + '><td class="danjuid">' + item.name + '</td><td class="xiaoshou_heji">' + item.heji + '</td><td><span class="glyphicon glyphicon-remove xiaosid_del" id="' + item.name + '"></span></td>/tr>');
+
+			    	qiuhe = qiuhe + item.heji;
+
+					$('#xiaoshoujineheji').text(qiuhe);
+		    	}
+		    	$('#wanglai_danjuid').val('');
+			},
+		    delay: 400,
+		});
+
+
+		var objmap_gys={};
+		$("#wanglai_shouk_kehu").typeahead({
+		    source: function (query, process) {
+		        return $.ajax({
+		            url: '{:url("Getval/getkehu")}',
+		            type: 'post',
+		            data: {kehu: query},
+		            success: function (fdata) {
+		        	    var names = [];
+		                $.each(fdata,function(index,ele){
+		                	objmap_gys[ele.name]=ele.id;
+		                    names.push(ele.name);
+		                });
+		                process(names);
+		            }
+		        });
+		    },
+		    items: 3,
+		    showHintOnFocus: true,
+		    afterSelect: function (item) {
+			    $('#wanglai_shoukuan_kehuid').val(objmap_gys[item]);
+			},
+		    delay: 400,
+		});
+
+
+
+		$('#wanglai_xiaos_id').on('click', '.xiaosid_del', function(event) {
+			var id = $(this).attr('id');
+			$('#xiaos_id_' + id).remove();
+			var heji = 0;
+			$('.xiaoshou_heji').each(function(index, el) {
+				heji = heji + parseFloat($(this).text());
+			});
+			$('#xiaoshoujineheji').text(heji);
+		});
+
+
+
+
+		$('#wanglai_shouk_xinzeng').click(function(event) {
+			if(parseFloat($('#xiaoshoujineheji').text()) > 0){
+				if(parseFloat($('#wanglai_shouk_shishou').val()) + parseFloat($('#wanglai_shouk_zhekou').val()) != parseFloat($('#xiaoshoujineheji').text())){
+					alert('单据金额不等于实收金额加折扣，请检查');
+					return false;
+				}
+			}
+
+			if(!isempty(['wanglai_shouk_date', 'wanglai_shouk_kehu', 'wanglai_shouk_shishou'])){
+				showtz('表单不全，请检查','');
+				return false;
+			}
+
+			if($('#wanglai_shoukuan_kehuid').val() == 0){
+				showtz('请输入客户名称','');
+				return false;
+			}
+
+			if($('#wanglai_shouk_shoukleibie').val() == 0){
+				showtz('请选择收款类别','');
+				return false;
+			}
+
+			$('#wanglai_shouk_xinzeng').attr('disabled', 'disabled');
+			$.ajax({
+				url: '{:url("Wanglai/shoukuan_do")}',
+				type: 'post',
+				data: {
+					fdate: $('#wanglai_shouk_date').val(),
+					kehuid: $('#wanglai_shoukuan_kehuid').val(),
+					zhaiyao: $('#wanglai_shouk_zhaiyao').val(),
+					shoukleibieid: $('#wanglai_shouk_shoukleibie').val(),
+					shishou: $('#wanglai_shouk_shishou').val(),
+					zhekou: $('#wanglai_shouk_zhekou').val(),
+					danjuid: getclasstext('danjuid')
+				},
+				success: function(msg){
+					if(typeof(msg) == 'string'){
+						$('#wanglai_shouk_xinzeng').removeAttr('disabled');
+						showtz(msg,'');
+						return false;
+					}
+
+					if(msg['status'] == 0){
+						showtz(msg['msg'],'');
+					}else{
+						var zhut = $('#wanglai_shoukuan').parent();
+						zhut.empty();
+						zhut.load('{:url("Wanglai/shoukuan")}');
+						showtz(msg['msg'] + '-保存成功',"<img src='{:url('getval/erweima')}?neirong=" + msg + "' class='center-block' />");
+						
+					}
+					$('#wanglai_shouk_xinzeng').removeAttr('disabled');
+				}
+			});
+		});
+
+
+		$('#wanglai_shouk_shishou').focusout(function(event) {
+			if(parseFloat($('#xiaoshoujineheji').text()) > 0){
+				var cha = parseFloat($('#xiaoshoujineheji').text())  - parseFloat($(this).val());
+				$('#wanglai_shouk_zhekou').val(cha);
+			}else{
+				$('#wanglai_shouk_zhekou').val(0);
+			}
+		});
+	</script>
+</div>

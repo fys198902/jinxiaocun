@@ -1,0 +1,90 @@
+<div id="caiwu_qitashouzhi" style="width: 600px; margin-top: 20px; margin-left: auto; margin-right: auto;">
+	<div>
+		<div class="form-group">
+		    <label for="qitashouzhi_id">编号</label>
+		    <input type="text" class="form-control" value="{$shouz_xt_id}" readonly="readonly">
+		</div>
+
+		<div class="form-group">
+		    <label for="qitashouzhi_date">日期</label>
+		    <input type="text" class="form-control" id="qitashouzhi_date" value="{$fdate}" placeholder="日期">
+		</div>
+
+		<div class="form-group">
+		    <label for="qitashouzhi_zhaiyao">摘要</label>
+		    <textarea class="form-control" rows="3" id="qitashouzhi_zhaiyao" placeholder="摘要"></textarea>
+		</div>
+
+		<div class="form-group">
+		    <label for="qitashouzhi_shoukleibie">收款类别</label>
+			<select id="qitashouzhi_shoukleibie" class="form-control">
+					<option value="0"><--请选择--></option>
+				{volist name="leibie" id="vo"}
+					<option value="{$vo.id}">{$vo.shoukleibie}</option>
+				{/volist}
+			</select></span>
+		</div>
+
+		<div class="form-group">
+		    <label for="qitashouzhi_leibie">类别</label>
+		    <select id="qitashouzhi_leibie" class="form-control">
+		    	<option value="0">支出</option>
+		    	<option value="1">收入</option>
+		    </select>
+		</div>
+
+		<div class="form-group">
+		    <label for="qitashouzhi_jine">金额</label>
+		    <input type="text" class="form-control" id="qitashouzhi_jine" placeholder="收支金额">
+		</div>
+
+		<button class="btn btn-primary" style="float: right; width: 120px" id="qitashouzhi_insert">新增</button>
+	</div>
+
+	<script type="text/javascript">
+		datelist('qitashouzhi_date');
+
+		$('#qitashouzhi_insert').click(function(event) {
+			if(!isempty(['qitashouzhi_zhaiyao', 'qitashouzhi_jine'])){
+				showtz('表单不全，请检查','');
+				return false;
+			}
+
+			if($('#qitashouzhi_shoukleibie').val() == 0){
+				showtz('请选择收款类别','');
+				return false;
+			}
+
+			$(this).attr('disabled', 'disabled');
+			$.ajax({
+				url: '{:url("Caiwu/qitashouzhi_do")}',
+				type: 'post',
+				data: {
+					fdate: $('#qitashouzhi_date').val(),
+					zhaiyao: $('#qitashouzhi_zhaiyao').val(),
+					shoukleibieid: $('#qitashouzhi_shoukleibie').val(),
+					leibie: $('#qitashouzhi_leibie').val(),
+					jine: $('#qitashouzhi_jine').val()
+				},
+				success: function(msg){
+					if(typeof(msg) == 'string'){
+						$('#qitashouzhi_insert').removeAttr('disabled');
+						showtz(msg,'');
+						return false;
+					}
+
+
+					if(msg['status'] == 0){
+						showtz(msg['msg'],'');
+					}else{
+						var zhut = $('#caiwu_qitashouzhi').parent();
+						zhut.empty();
+						zhut.load('{:url("Caiwu/qitashouzhi")}');
+						showtz(msg['msg'] + '-保存成功', "<img src='{:url('getval/erweima')}?neirong=" + msg + "' class='center-block' />");
+					}
+					$('#qitashouzhi_insert').removeAttr('disabled');
+				}
+			});
+		});
+	</script>
+</div>

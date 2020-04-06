@@ -1,0 +1,40 @@
+<link href="/public/static/css/bootstrap.min.css" rel="stylesheet">
+<script src="/public/static/js/jquery.min.js"></script>
+<script src="/public/static/js/bootstrap.min.js"></script>
+<script src="/public/static/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<style media="print">
+	@page {
+      size: auto;  /* auto is the initial value */
+      margin: 0mm; /* this affects the margin in the printer settings */
+    }
+</style>
+<div style="padding: 40px 40px 0 40px; width: 960px; margin: 0 auto">
+	<h3 style="text-align: center; font-size: 26px; margin-bottom: 20px">供应商欠款明细</h3>
+	<h4 style="text-align: right;">截止/打印时间：{$print_date}</h4>
+	<div>
+		<table class="table table-bordered table-condensed">
+			<tr>
+				<th style="width: 80px">ID</th>
+				<th>供应商名称</th>
+				<th style="width: 150px">欠款金额</th>
+			</tr>
+			{volist name="row" id="vo"}
+				{php}$heji = $heji + $vo['qiank']{/php}
+				<tr>
+					<td>{$i}</td>
+					<td style="text-align: left">{$vo.gongys_name}-{$vo.gongys_dizhi}</td>
+					<td style="text-align: center;">{$vo.qiank}</td>
+				</tr>
+			{/volist}
+			<tr>
+				<td>合计</td>
+				<td></td>
+				<td style="text-align: center;">{$heji}</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<script>
+	window.print();
+</script>

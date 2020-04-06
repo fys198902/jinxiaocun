@@ -1,0 +1,119 @@
+<style>
+	.beijing:hover{
+		color: red;
+	}
+</style>
+<div id="hout_yuangong_zhuti">
+	<div style="width: 200px; height: 200px;position: relative;left: 10px; top: 5px">
+		<div class="form-group">
+		    <label >员工姓名</label>
+		    <input type="text" class="form-control" id="hout_yuangong_name" placeholder="员工姓名">
+		</div>
+
+		<div class="form-group">
+		    <label >联系方式</label>
+		    <input type="text" class="form-control" id="hout_yuangong_lianxfs" placeholder="联系方式">
+		</div>
+		<button class="btn btn-primary" style="width: 98%" id="hout_yuangong_insert" >新增</button>
+		<input type="hidden" id="hout_yuang_id">
+	</div>
+
+
+	<div style="position: relative; top: -190px; left: 250px; width: 60%;">
+		<table class="table table-bordered">
+			<tr>
+				<th>ID</th>
+				<th>员工姓名</th>
+				<th>联系方式</th>
+				<th>操作</th>
+			</tr>
+			{volist name="row" id="vo"}
+				<tr class ="update_yuang" id='{$vo.id}'>
+					<td>{$i}</td>
+					<td>{$vo.yuang}</td>
+					<td>{$vo.lianxfs}</td>
+					<td>
+						<span data-id='{$vo.id}' class="beijing yuang_del glyphicon glyphicon-remove"></span>
+						<span data-id='{$vo.id}' data-name="{$vo.yuang}" data-lianxfs="{$vo.lianxfs}" class="beijing yuang_xiugai glyphicon glyphicon-pencil" style="margin-left: 10px"></span>
+					</td>
+				</tr>
+			{/volist}
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#hout_yuangong_insert').click(function(event) {
+		$(this).attr('disabled', 'disabled');
+		if($(this).text() != '修改'){
+			$(this).attr('disabled', 'disabled');
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/yuangong_do")}',
+				data:{
+					yuang: $('#hout_yuangong_name').val(),
+					lianxfs: $('#hout_yuangong_lianxfs').val()
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+					$('#hout_yuangong_insert').removeAttr('disabled');
+					$('#hout_yuangong_name').val('');
+					$('#hout_yuangong_lianxfs').val('');
+					var zhuti = $('#hout_yuangong_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/yuangong")}');
+
+				}
+			})
+		}else{
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/yuangong_update")}',
+				data:{
+					yuang: $('#hout_yuangong_name').val(),
+					lianxfs: $('#hout_yuangong_lianxfs').val(),
+					id: $('#hout_yuang_id').val()
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+					var zhuti = $('#hout_yuangong_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/yuangong")}');
+
+				}
+			})
+		}
+		
+	});
+
+
+	$('.yuang_del').click(function(event) {
+		var id = $(this).attr('data-id');
+		if(confirm('确认要删除吗？')){
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/yuangong_del")}',
+				data:{
+					id: id
+				},
+				success: function(msg){
+					showtz(msg['msg'],'');
+				}
+			})
+			var zhuti = $('#hout_yuangong_zhuti').parent();
+			zhuti.empty();
+			zhuti.load('{:url("Hout/yuangong")}');
+		}
+	});
+
+
+	$('.yuang_xiugai').click(function(event) {
+		var id = $(this).attr('data-id');
+		$('#hout_yuang_id').val(id);
+		$('#hout_yuangong_name').val($(this).attr('data-name'));
+		$('#hout_yuangong_lianxfs').val($(this).attr('data-lianxfs'));
+
+		$('#hout_yuangong_insert').text('修改');
+
+	});
+</script>

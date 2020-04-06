@@ -1,0 +1,178 @@
+<div id="gongysduizd" style="margin-top: 10px">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+            <input type="text" id="gongysduizd_ksrq" style="width: 150px" value="{$ksrq}" class="form-control" placeholder="开始日期">
+        </div>
+        <div class="form-group">
+            <input type="text" id="gongysduizd_jsrq" style="width: 150px" value="{$jsrq}" class="form-control" placeholder="结束日期">
+        </div>
+        <div class="form-group">
+            <input type="text" id="gongysduizd_gongys" style="width: 180px" value="{$gongys}" class="form-control" placeholder="供应商名称">
+            <input type="hidden" id="gongysduizd_gongys_id" value="{$gongysid}">
+        </div>
+        <button id="gongysduizd_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+        <button id="gongysduizd_dayin" class="btn btn-success" style="margin-left: 8px">打印</button>
+
+    </div>
+
+
+    <div style="width: 99%; margin-left: 8px">
+        <table class="table">
+            <tr>
+                <td>项目</td>
+                <td>金额</td>
+                <td>备注</td>
+            </tr>
+            <tr>
+                <td style="width: 32%">期初余额</td>
+                <td style="width: 32%">{$qichu}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>本期付款及折扣</td>
+                <td>{$benqi_fukuan*-1 + $benqi_zhekou*-1}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>本期采购额</td>
+                <td>{$benqi_caigou}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>期末余额</td>
+                <td>{$qichu - $benqi_fukuan - $benqi_zhekou + $benqi_caigou}</td>
+                <td></td>
+            </tr>
+        </table>
+
+
+        <h4>已付款及折扣明细</h4>
+        <table class="table">
+            <tr>
+                <td style="width: 120px">日期</td>
+                <td style="width: 150px">单据ID</td>
+                <td style="width: 80px">付款类别</td>
+                <td style="width: 180px">已付金额</td>
+                <td style="width: 180px">折扣金额</td>
+                <td>摘要</td>
+            </tr>
+
+            {volist name="fukuanzhek" id="vo"}
+                {php}$shifu_hej = $shifu_hej - $vo['shifu'];{/php}
+                {php}$zhekou_hej = $zhekou_hej - $vo['zhekou'];{/php}
+
+                <tr>
+                    <td>{$vo.fdate}</td>
+                    <td>{$vo.fukuan_xt_id}</td>
+                    <td>{$vo.shoukleibie}</td>
+                    <td>{$vo.shifu*-1}</td>
+                    <td>{$vo.zhekou*-1}</td>
+                    <td>{$vo.zhaiyao}</td>
+                </tr>
+            {/volist}
+
+            <tr>
+                <td>合计</td>
+                <td></td>
+                <td></td>
+                <td>{$shifu_hej}</td>
+                <td>{$zhekou_hej}</td>
+                <td></td>
+            </tr>
+        </table>
+
+
+        <h4>采购明细</h4>
+        <table class="table">
+            <tr>
+                <td style="width: 120px">日期</td>
+                <td style="width: 150px">单据ID</td>
+                <td style="width: 180px">品种</td>
+                <td style="width: 60px">单位</td>
+                <td style="width: 80px">数量</td>
+                <td style="width: 80px">单价</td>
+                <td style="width: 80px">金额</td>
+                <td>备注</td>
+            </tr>
+
+            {volist name="caigoulist" id="vo"}
+                {php}$caigou_shul = $caigou_shul + $vo['shul'];{/php}
+                {php}$caigou_jine = $caigou_jine + $vo['jine'];{/php}
+
+                <tr>
+                    <td>{$vo.caig_date}</td>
+                    <td>{$vo.caig_xt_id}</td>
+                    <td>{$vo.wuliao_name}</td>
+                    <td>{$vo.danw_name}</td>
+                    <td>{$vo.shul}</td>
+                    <td>{$vo.danj}</td>
+                    <td>{$vo.jine}</td>
+                    <td>{$vo.beizhu}</td>
+                </tr>
+            {/volist}
+            <tr>
+                <td>合计</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>{$caigou_shul}</td>
+                <td></td>
+                <td>{$caigou_jine}</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    datelist('gongysduizd_ksrq');
+    datelist('gongysduizd_jsrq');
+
+    var objmap_gys={};
+    $("#gongysduizd_gongys").typeahead({
+        source: function (query, process) {
+            return $.ajax({
+                url: '{:url("Getval/getgongys")}',
+                type: 'post',
+                data: {gongys: query},
+                success: function (fdata) {
+                    var names = [];
+                    $.each(fdata,function(index,ele){
+                        objmap_gys[ele.name]=ele.id;
+                        names.push(ele.name);
+                    });
+                    process(names);
+                }
+            });
+        },
+        items: 5,
+        showHintOnFocus: true,
+        afterSelect: function (item) {
+            $('#gongysduizd_gongys_id').val(objmap_gys[item]);
+        },
+        delay: 400,
+    });
+
+
+    $('#gongysduizd_search').click(function(event) {
+        var zhut = $('#gongysduizd').parent();
+        var ksrq = $('#gongysduizd_ksrq').val();
+        var jsrq = $('#gongysduizd_jsrq').val();
+        var gongys = $('#gongysduizd_gongys').val();
+        var gongysid = $('#gongysduizd_gongys_id').val();
+
+        zhut.empty();
+
+        zhut.load('{:url("wanglai/gongysduizd")}?ksrq=' + ksrq + "&jsrq=" + jsrq + "&gongys=" + gongys + "&gongysid="  + gongysid);
+    });
+
+
+    $('#gongysduizd_dayin').click(function(event) {
+        var zhut = $('#gongysduizd').parent();
+        var ksrq = $('#gongysduizd_ksrq').val();
+        var jsrq = $('#gongysduizd_jsrq').val();
+        var gongys = $('#gongysduizd_gongys').val();
+        var gongysid = $('#gongysduizd_gongys_id').val();
+        window.open('{:url("wanglai/gongys_duizhangd_dayin")}?ksrq=' + ksrq + "&jsrq=" + jsrq + "&gongys=" + gongys + "&gongysid="  + gongysid ,"供应商对账单打印");
+    });
+</script>

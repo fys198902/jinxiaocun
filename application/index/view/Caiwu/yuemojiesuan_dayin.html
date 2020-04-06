@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>月末结算打印</title>
+	<link rel="stylesheet" type="text/css" href="/__CSS__/bootstrap.min.css">
+	<style>
+		td,th{
+			text-align: center;
+		}
+	</style>
+
+	<style media="print">
+		@page {
+	      size: auto;  /* auto is the initial value */
+	      margin: 0mm; /* this affects the margin in the printer settings */
+	    }
+	</style>
+
+</head>
+<body style="padding: 10px">
+	<div style="width: 960px; padding: 20px 40px 0 40px; margin:0 auto">
+		<h2 style="text-align: center; margin-bottom: 30px">{$yuefen}月末结算</h2>
+		<div style="margin-top: 10px">
+			<h4>一、上期单位成本</h4>
+				<table class="table table-bordered">
+					<tr>
+						<td style="width: 60px">ID</td>
+						<td>物料</td>
+						<td style="width: 160px">初期数量-基本</td>
+						<td style="width: 160px">期初金额-基本</td>
+						<td style="width: 160px">期初成本</td>
+					</tr>
+					
+					{volist name="$shangqi" id="vo"}
+						<tr>
+							<td>{$i}</td>
+							<td>{$vo.wuliao_name}</td>
+							<td>{$vo.shul}</td>
+							<td>{$vo.jine}</td>
+							{if $vo['shul']>0}
+								<td>{$vo.jine/$vo.shul|round=2}</td>
+							{else}
+								<td>-</td>
+							{/if}
+						</tr>
+					{/volist}
+
+				</table>
+			<h4>二、本期购入及单位成本</h4>
+			<table class="table table-bordered">
+				<tr>
+					<td style="width: 60px">ID</td>
+					<td>物料</td>
+					<td style="width: 160px">本期购入数量-基本</td>
+					<td style="width: 160px">本期购入金额-基本</td>
+					<td style="width: 160px">本期购入-成本价</td>
+				</tr>
+
+				{volist name="$benqi" id="vo"}
+					<tr>
+						<td>{$i}</td>
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.gourushul}</td>
+						<td>{$vo.gourujine}</td>
+						{if $vo['gourushul']>0}
+							<td>{$vo.gourujine/$vo.gourushul|round=2}</td>
+						{else}
+							<td>-</td>
+						{/if}
+					</tr>
+				{/volist}
+			</table>
+
+			<h4>三、本期加权后平均单位成本</h4>
+			<table class="table table-bordered">
+				<tr>
+					<td style="width: 60px">ID</td>
+					<td>物料</td>
+					<td style="width: 160px">合计数量-基本</td>
+					<td style="width: 160px">合计金额-基本</td>
+					<td style="width: 160px">加权成本</td>
+				</tr>
+
+				{volist name="$quanbu" id="vo"}
+					<tr>
+						<td>{$i} <input type="hidden" class="chengb_wuliaoid" value="{$vo.id}"></td>
+						<td>{$vo.wuliao}  <input type="hidden" value="{$vo.wuliao}"></td>
+						<td>{$vo.shul} <input type="hidden" class="chengb_shul" value="{$vo.shul}"></td>
+						<td>{$vo.jine} <input type="hidden" class="chengb_jine" value="{$vo.jine}"></td>
+						{if $vo['shul']>0}
+							<td>{$vo.jine/$vo.shul|round=2}</td>
+						{else}
+							<td>-</td>
+						{/if}
+					</tr>
+				{/volist}
+			</table>
+
+
+			<h4>四、本月实际成本收入及毛利</h4>
+			<table class="table table-bordered">
+				<tr>
+					<td style="width: 60px">ID</td>
+					<td>物料</td>
+					<td style="width: 100px">单位换算</td>
+					<td>基本数量</td>
+					<td>单位成本</td>
+					<td>成本合计</td>
+					<td>收入合计</td>
+					<td>毛利金额</td>
+				</tr>
+				{volist name="chengben" id="vo"}
+					{php}$zongchengben = $zongchengben + $vo['chengbenjia'];{/php}
+					{php}$zongshouru = $zongshouru + $vo['shouru'];{/php}
+
+					<tr>
+						<td>{$i}</td>
+						<td>{$vo.wuliao}</td>
+						<td>{$vo.huansuan}</td>
+						<td>{$vo.jibenshul}</td>
+						<td>{$vo.danwchengb}</td>
+						<td>{$vo.chengbenjia}</td>
+						<td>{$vo.shouru|round=2}</td>
+						<td>{$vo.shouru - $vo.chengbenjia|round=2}</td>
+					</tr>
+				{/volist}
+				<tr>
+					<td>合计</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>{$zongchengben}</td>
+					<td>{$zongshouru|round=2}</td>
+					<td>{$zongshouru - $zongchengben|round=2}</td>
+				</tr>
+			</table>
+
+			<h4>五、其他收支及本月折扣</h4>
+			<table class="table table-bordered">
+				<tr>
+					<td>项目</td>
+					<td>金额</td>
+				</tr>
+
+				<tr>
+					<td>本月毛利</td>
+					<td>{$zongshouru - $zongchengben|round=2}</td>
+				</tr>
+				<tr>
+					<td>本月折扣</td>
+					<td>{$zhekou*-1|round=2}</td>
+				</tr>
+				<tr>
+					<td>其他收支</td>
+					<td>{$qitashouzhi[0]['jine']|round=2}</td>
+				</tr>
+				<tr>
+					<td>本月净利</td>
+					<td>{$zongshouru - $zongchengben - $zhekou + $qitashouzhi[0]['jine']}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+		window.print();
+	</script>
+
+</body>
+</html>

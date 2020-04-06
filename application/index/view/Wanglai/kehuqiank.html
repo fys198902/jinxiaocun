@@ -1,0 +1,40 @@
+<div id="wanglai_kehuqiank_zhut" style="margin-top: 10px;padding-left: 5px">
+	<div class="navbar-form navbar-right">
+		<button id="wanglai_kehuqiank_print" class="btn btn-success" style="margin-left: 8px">打印</button>
+		<button id="wanglai_kehuqiank_daochu" class="btn btn-success" style="margin-left: 8px">导出</button>
+
+	</div>
+
+	<div>
+		<table class="table table-bordered table-condensed">
+			<tr>
+				<th style="width: 80px">ID</th>
+				<th>客户名称</th>
+				<th style="width: 150px">欠款金额</th>
+			</tr>
+			{volist name="row" id="vo"}
+				{php}$heji = $heji + $vo['qiank']{/php}
+				<tr>
+					<td>{$i}</td>
+					<td style="text-align: left">{$vo.kehu_name}-{$vo.kehu_dizhi}</td>
+					<td style="text-align: center;">{$vo.qiank}</td>
+				</tr>
+			{/volist}
+				<tr>
+					<td>合计</td>
+					<td></td>
+					<td style="text-align: center;">{$heji}</td>
+				</tr>
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#wanglai_kehuqiank_print').click(function(event) {
+		window.open('{:url("wanglai/kehuqiank")}?print=1');
+	});
+
+	$('#wanglai_kehuqiank_daochu').click(function(event) {
+		window.open('{:url("wanglai/kehuqiank_daochu")}');
+	});
+</script>

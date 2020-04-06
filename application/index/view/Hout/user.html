@@ -1,0 +1,211 @@
+<style>
+	.chaolianjie{
+		cursor: pointer;
+		color: #428bca;
+	}
+
+	.user_del:hover,.user_jinyong:hover, .user_set_juese:hover, .user_reset:hover{
+		color: red;
+	}
+</style>
+<div id="hout_user_zhuti">
+	<div style="width: 200px; height: 200px;position: relative;left: 10px; top: 5px">
+		<div class="form-group">
+		    <label for="hout_username">用户名</label>
+		    <input type="text" class="form-control" id="hout_username" placeholder="用户名">
+		</div>
+
+		<div class="form-group" id="hout_user_mima">
+		    <label for="hout_password">密码</label>
+		    <input type="password" class="form-control" id="hout_password" placeholder="密码">
+		</div>
+
+		<div class="form-group" id="hout_user_remima">
+		    <label for="hout_repassword">重复密码</label>
+		    <input type="password" class="form-control" id="hout_repassword" placeholder="重复密码">
+		</div>
+		<div class="form-group" id="user_jues">
+			<label for="jues_id">角色设定</label>
+			<select class="form-control" id="jues_id">
+				{volist name="juese" id="vo"}
+					<option value="{$vo.id}">{$vo.jues_name}</option>
+				{/volist}
+			</select>
+		</div>
+		<button class="btn btn-primary" style="width: 99%" id="hout_user_insert" >新增</button>
+		<input type="hidden" id="hout_user_id">
+	</div>
+
+
+	<div style="position: relative; top: -190px; left: 250px; width: 60%;">
+		<table class="table table-bordered">
+			<tr>
+				<th>ID</th>
+				<th>用户名</th>
+				<th>角色</th>
+				<th>操作</th>
+			</tr>
+			{volist name="row" id="vo"}
+				<tr>
+					<td>{$i}</td>
+					<td>{$vo.username}</td>
+					<td>{$vo.jues_name}</td>
+					<td>
+						<span class="user_del glyphicon glyphicon-remove" data-id='{$vo.id}'>删除</span> /
+						{if $vo['status'] == 1}
+							<span class="user_jinyong glyphicon glyphicon-ban-circle" data-id='{$vo.id}' data-status='0'>禁用</span> /
+						{else/}
+							<span class="user_jinyong glyphicon glyphicon glyphicon-leaf" data-id='{$vo.id}' data-status='1'>启用</span> /
+						{/if}
+							<span class="user_set_juese glyphicon glyphicon-pencil" data-id='{$vo.id}' data-username='{$vo.username}' data-jueseid='{$vo.jueseid}' data-juesename='{$vo.jues_name}' data-status='1'>修改角色</span> /
+
+							<span class="user_reset glyphicon glyphicon-inbox" data-id='{$vo.id}' data-username='{$vo.username}'>重置密码</span>
+					</td>
+				</tr>
+			{/volist}
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#hout_user_insert').click(function(event) {
+		if($(this).text() == '新增'){
+			if($('#hout_password').val() == $('#hout_repassword').val()){
+				$(this).attr('disabled', 'disabled');
+				$.ajax({
+					type: 'post',
+					url:'{:url("Hout/user_do")}',
+					data:{
+						username: $('#hout_username').val(),
+						password: $('#hout_password').val(),
+						jueseid: $('#jues_id').val()
+					},
+					success: function(msg){
+						$('#hout_user_insert').removeAttr('disabled');
+						$('#hout_username').val('');
+						$('#hout_password').val('');
+						var zhuti = $('#hout_user_zhuti').parent();
+						zhuti.empty();
+						zhuti.load('{:url("Hout/user")}');
+						showtz(msg,'');
+
+					}
+				})
+			}else{
+				showtz('两次密码不一致','');
+			}
+		}
+
+		if($(this).text() == '重置密码'){
+			if($('#hout_password').val() == $('#hout_repassword').val()){
+				$.ajax({
+					type: 'post',
+					url: '{:url("Hout/user_pwd_chongzhi")}',
+					data:{
+						id: $('#hout_user_id').val(),
+						newpwd: $('#hout_password').val()
+					},
+					success: function(msg){
+						showtz(msg,'');
+					}
+				})
+			}else{
+				showtz('两次密码不一致','');
+			}
+			
+		}
+
+		if($(this).text() == '修改角色'){
+			$.ajax({
+				type: 'post',
+				url: '{:url("Hout/user_set_juese")}',
+				data:{
+					userid: $('#hout_user_id').val(),
+					jueseid: $('#jues_id').val()
+				},
+				success: function(msg){
+					var zhuti = $('#hout_user_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/user")}');
+					showtz(msg,'');
+				}
+			})
+		}
+		
+	});
+
+
+	$('.user_del').click(function(event) {
+		var id = $(this).attr('data-id');
+		if(confirm('确认要删除吗？')){
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/user_del")}',
+				data:{
+					id: id
+				},
+				success: function(msg){
+					var zhuti = $('#hout_user_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/user")}');
+					showtz(msg);
+				}
+			})
+		}
+	});
+
+	$('.user_jinyong').click(function(event) {
+		var user_id = $(this).attr('data-id');
+		var user_status = $(this).attr('data-status');
+
+		if(confirm('确认要更改吗？')){
+			$.ajax({
+				type: 'post',
+				url:'{:url("Hout/user_status")}',
+				data:{
+					id: user_id,
+					status: user_status
+				},
+				success: function(msg){
+					var zhuti = $('#hout_user_zhuti').parent();
+					zhuti.empty();
+					zhuti.load('{:url("Hout/user")}');
+					showtz(msg);
+				}
+			})
+		}
+	});
+
+	$('.user_set_juese').click(function(event) {
+		var user_id = $(this).attr('data-id');
+		var user_name = $(this).attr('data-username');
+		var jues_id = $(this).attr('data-jueseid');
+		var jues_name = $(this).attr('data-juesename');
+
+		$('#hout_user_id').val(user_id);
+		$('#hout_username').val(user_name);
+		$('#hout_user_mima').addClass('hidden');
+		$('#hout_user_remima').addClass('hidden');
+		$('#user_jues').removeClass('hidden');
+		$('#jues_id').append('<option selected = "selected" value="' + jues_id + '">' + jues_name + '</option>');
+		$('#hout_user_insert').text('修改角色');
+		$('#hout_user_insert').attr('disabled','disabled');
+	});
+
+	$('#jues_id').change(function(event) {
+		if($('#hout_user_insert').text() == '修改角色'){
+			$('#hout_user_insert').removeAttr('disabled');
+		}
+	});
+
+
+	$('.user_reset').click(function(event) {
+		var id = $(this).attr('data-id');
+		$('#hout_user_id').val(id);
+		$('#hout_username').val($(this).attr('data-username'));
+		$('#user_jues').addClass('hidden');
+		$('#hout_user_mima').removeClass('hidden');
+		$('#hout_user_remima').removeClass('hidden');
+		$('#hout_user_insert').text('重置密码');
+	});
+</script>

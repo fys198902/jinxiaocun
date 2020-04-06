@@ -1,0 +1,131 @@
+<div id="wanglai_fukuanuan_zhut" style="width: 600px; margin-top: 20px; margin-left: auto; margin-right: auto;">
+	<div>
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_kehu">编号</label>
+		    <input type="email" class="form-control" value="{$fukuan_xt_id}" readonly="readonly">
+		</div>
+
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_date">日期</label>
+		    <input type="email" class="form-control" id="wanglai_fukuan_date" value="{$fdate}" placeholder="日期">
+		</div>
+
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_gongys">供应商名称</label>
+		    <input type="email" class="form-control" id="wanglai_fukuan_gongys" placeholder="供应商名称">
+		    <input type="hidden" id="wanglai_fukuan_gongysid">
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_zhaiyao">摘要</label>
+		    <textarea class="form-control" rows="3" id="wanglai_fukuan_zhaiyao" placeholder="摘要"></textarea>
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_shoukleibie">付款类别</label>
+			<select id="wanglai_fukuan_shoukleibie" class="form-control">
+					<option value="0"><--请选择--></option>
+				{volist name="leibie" id="vo"}
+					<option value="{$vo.id}">{$vo.shoukleibie}</option>
+				{/volist}
+			</select></span>
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_shifu">付款金额</label>
+		    <input type="text" class="form-control" id="wanglai_fukuan_shifu" placeholder="实收金额">
+		</div>
+
+		<div class="form-group">
+		    <label for="wanglai_fukuan_zhekou">折扣金额</label>
+		    <input type="text" class="form-control" id="wanglai_fukuan_zhekou" placeholder="折扣金额">
+		</div>
+
+		<button class="btn btn-primary" style="float: right; width: 120px" id="wanglai_fukuan_xinzeng">新增</button>
+	</div>
+
+	<script type="text/javascript">
+		datelist('wanglai_fukuan_date');
+
+		$('#wanglai_fukuan_gongys').focusout(function(event) {
+			if($(this).val() == ''){
+				$('#wanglai_fukuan_gongysid').val('');
+			}
+		});
+
+		var objmap_gys={};
+		$("#wanglai_fukuan_gongys").typeahead({
+		    source: function (query, process) {
+		        return $.ajax({
+		            url: '{:url("Getval/getgongys")}',
+		            type: 'post',
+		            data: {gongys: query},
+		            success: function (fdata) {
+		        	    var names = [];
+		                $.each(fdata,function(index,ele){
+		                	objmap_gys[ele.name]=ele.id;
+		                    names.push(ele.name);
+		                });
+		                process(names);
+		            }
+		        });
+		    },
+		    items: 5,
+		    showHintOnFocus: true,
+		    afterSelect: function (item) {
+			    $('#wanglai_fukuan_gongysid').val(objmap_gys[item]);
+			},
+		    delay: 400,
+		});
+
+
+
+		$('#wanglai_fukuan_xinzeng').click(function(event) {
+			if(!isempty(['wanglai_fukuan_date','wanglai_fukuan_gongys','wanglai_fukuan_shifu'])){
+				showtz('表单不全，请检查', '');
+				return false;
+			}
+
+			if($('#wanglai_fukuan_shoukleibie').val() == 0){
+				showtz('请选择付款类别', '');
+				return false;
+			}
+
+			$(this).attr('disabled', 'disabled');
+			$.ajax({
+				url: '{:url("Wanglai/fukuandan_do")}',
+				type: 'post',
+				data: {
+					fdate: $('#wanglai_fukuan_date').val(),
+					gongysid: $('#wanglai_fukuan_gongysid').val(),
+					zhaiyao: $('#wanglai_fukuan_zhaiyao').val(),
+					shoukleibieid: $('#wanglai_fukuan_shoukleibie').val(),
+					shifu: $('#wanglai_fukuan_shifu').val(),
+					zhekou: $('#wanglai_fukuan_zhekou').val()
+				},
+				success: function(msg){
+					if(typeof(msg) == 'string'){
+						$('#wanglai_fukuan_xinzeng').removeAttr('disabled');
+						showtz(msg,'');
+						return false;
+					}
+
+					if(msg['status'] == 0){
+						showtz(msg['msg'],'');
+					}else{
+						$('#wanglai_fukuandan_gongysid').val('');
+						$('#wanglai_fukuan_gongys').val('');
+						$('#wanglai_fukuan_zhaiyao').val('');
+						$('#wanglai_fukuan_shifu').val('');
+						$('#wanglai_fukuan_zhekou').val('');
+						showtz(msg['msg'] + '-保存成功', "<img src='{:url('getval/erweima')}?neirong=" + msg + "' class='center-block' />");
+					}
+					$('#wanglai_fukuan_xinzeng').removeAttr('disabled');
+				}
+			});
+		});
+	</script>
+</div>

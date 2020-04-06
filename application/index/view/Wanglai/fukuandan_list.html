@@ -1,0 +1,120 @@
+<div id="fukuan_list_zhut" style="margin-left: 10px">
+	<div style="width: 99%; text-align: right">
+		<div class="navbar-form navbar-right" role="search">
+			<div class="form-group">
+				<input type="text" id="fukuan_list_gongys" style="width: 180px" class="form-control" value="{$gongys}" placeholder="供应商名称/单据ID">
+			</div>
+
+			<div class="form-group">
+				<input type="text" id="fukuan_list_zhaiyao" style="width: 180px" class="form-control" value="{$zhaiyao}" placeholder="摘要">
+			</div>
+			<button id="fukuan_list_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+			<button id="fukuan_list_del" class="btn btn-warning" style="margin-left: 10px">删除</button>
+			<button id="fukuan_list_daochu" class="btn btn-info" style="margin-left: 10px">导出</button>
+		</div>
+	</div>
+
+	<div>
+		<table class="table table-bordered" id="fukuan_list_table">
+			<tr>
+				<th style="width: 40px">ID</th>
+				<td style="width: 150px">单据ID</td>
+				<th style="width: 120px">日期</th>
+				<th style="width: 200px">供应商名称</th>
+				<th>摘要</th>
+				<th style="width: 80px">付款类别</th>
+				<th style="width: 100px">实付金额</th>
+				<th style="width: 100px">折扣金额</th>
+				<th style="width: 100px">制单人</th>
+			</tr>
+
+			{volist name="row" id="vo"}
+				<tr id="{$vo.id}">
+					<td>{$i}</td>
+					<td>{$vo.fukuan_xt_id}</td>
+					<td>{$vo.fdate}</td>
+					<td style="text-align: left">{$vo.gongys_name}-{$vo.gongys_dizhi}</td>
+					<td style="text-align: left">{$vo.zhaiyao}</td>
+					<td>{$vo.shoukleibie}</td>
+					<td>{$vo.shifu}</td>
+					<td>{$vo.zhekou}</td>
+					<td>{$vo.username}</td>
+				</tr>
+			{/volist}
+
+			<tr class="fukuan_list" style="text-align: center;border: none">
+				<td colspan="9">
+					<ul class="pagination" style="margin: 0px;padding: 0px">
+					<li><a href="#" id="{$shangyiye}">&laquo;</a></li>
+					{for start="$qishiye" end="$jieshuye"}
+						<li {if $i+1==$dangqianye} class="active" {/if}><a href="#" id="{$i+1}">{$i+1}</a></li>
+					{/for}
+					<li><a href="#" id="{$xiayiye}"><span>&raquo;</span></a></li>
+				</ul>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<script type="text/javascript">
+		$('#fukuan_list_search').click(function(event) {
+			var zhuti = $('#fukuan_list_zhut').parent();
+			var gongys = $('#fukuan_list_gongys').val();
+			var zhaiyao = $('#fukuan_list_zhaiyao').val();
+			zhuti.empty();
+			zhuti.load('{:url("Wanglai/fukuandan_list")}?gongys=' + gongys + "&zhaiyao=" + zhaiyao);
+		});
+		
+
+		$('#fukuan_list_table tr').click(function(event) {
+			$('.bgcolor').removeClass('bgcolor');
+			$(this).toggleClass('bgcolor');
+		});
+
+		$('#fukuan_list_table tr').dblclick(function(event) {
+			var fukuan_id = $(this).attr('id');
+			var fukuan_xt_id = $(this).children('td').eq(1).text();
+			addtabs('list' + (parseInt($('.nav-tabs').children('li').length)+1),fukuan_xt_id + '修改','wanglai/fukuan_update?id=' + fukuan_id);
+		});
+
+
+		$('#fukuan_list_del').click(function(event) {
+			var tr_zhut = $('#fukuan_list_table').find('.bgcolor');
+			var id = tr_zhut.attr('id');
+			var xtid = tr_zhut.find('td').eq(1).text();
+			var gongys = $('#fukuan_list_gongys').val();
+			var zhaiyao = $('#fukuan_list_zhaiyao').val();
+			var zhuti = $('#fukuan_list_zhut').parent();
+			if(confirm('确定删除' + xtid + '吗？')){
+				zhuti.empty();
+				$.ajax({
+					url: '{:url("Wanglai/fukuan_del")}',
+					data:{
+						id: id
+					},
+					success: function(msg){
+						showtz(msg,'');
+						zhuti.load('{:url("Wanglai/fukuandan_list")}?gongys=' + gongys + "&zhaiyao=" + zhaiyao);
+					}
+				})
+			}
+		});
+
+
+		$('#fukuan_list_daochu').click(function(event) {
+			var gongys = $('#fukuan_list_gongys').val();
+			var zhaiyao = $('#fukuan_list_zhaiyao').val();
+			window.open('{:url("Wanglai/fukuan_daochu")}?gongys=' + gongys + "&zhaiyao=" + zhaiyao);
+		});
+
+
+		$('.fukuan_list .pagination a').click(function(event) {
+			var zhuti = $('#fukuan_list_zhut').parent();
+			var id = $(this).attr('id');
+			var gongys = $('#fukuan_list_gongys').val();
+			var zhaiyao = $('#fukuan_list_zhaiyao').val();
+			zhuti.empty();
+			zhuti.load("{:url('Wanglai/fukuandan_list')}?page=" + id + '&gongys=' + gongys + '&zhaiyao=' + zhaiyao);
+		});
+	</script>
+</div>

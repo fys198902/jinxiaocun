@@ -1,0 +1,85 @@
+<div id="caiwu_rijizhang_list" style="margin-left: 10px; margin-top: 10px">
+
+	<div class="navbar-form navbar-right">
+		<div class="form-group">
+			<input type="text" id="caiwu_rijizhang_ksrq" style="width: 150px" class="form-control" value="{$ksrq}" placeholder="开始日期">
+		</div>
+		<div class="form-group">
+			<input type="text" id="caiwu_rijizhang_jsrq" style="width: 150px" class="form-control" value="{$jsrq}" placeholder="结束日期">
+		</div>
+
+		<div class="form-group">
+			<select id="caiwu_rijizhang_leibie" class="form-control">
+				<option value="{$leibie}">{$leibie}</option>
+				{volist name="row" id="vo"}
+					<option value="{$vo.shoukleibie}">{$vo.shoukleibie}</option>
+				{/volist}
+			</select>
+		</div>
+
+
+		<button id="caiwu_rijizhang_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+	</div>
+
+
+	<div style="overflow-x: auto; width: 99%">
+		<table class="table table-bordered table-striped" style="min-width: 1000px">
+			<tr>
+				<th style="width: 120px">单据类别</th>
+				<th style="width: 80px">编号</th>
+				<th style="width: 120px">日期</th>	
+				<th>核算项目</th>	
+				<th>摘要</th>	
+				<th style="width: 80px">类别</th>	
+				<th style="width: 80px">金额</th>
+				<th style="width: 80px">余额</th>
+			</tr>
+
+			<tr>
+				<td>期初余额</td>
+				<td colspan="6"></td>
+				<td>{$qichu}</td>
+			</tr>
+			{php}$yue=$qichu;{/php}
+			{volist name="qijian" id="vo"}
+				{php}$yue = $vo['jine'] + $yue;{/php}
+
+				<tr>
+					<td>{$vo.leibie}</td>
+					<td>{$vo.xt_id}</td>
+					<td>{$vo.fdate}</td>
+					<td style="text-align: left">{$vo.fitem}</td>
+					<td style="text-align: left">{$vo.zhaiyao}</td>
+					<td>{$vo.shoukleibie}</td>
+					<td>{$vo.jine}</td>
+					<td>{$yue}</td>
+				</tr>
+			{/volist}
+
+			<tr>
+				<td>期末余额</td>
+				<td colspan="6"></td>
+				<td>{$qimo}</td>
+			</tr>
+		</table>
+	</div>
+
+	
+</div>
+
+<script type="text/javascript">
+	datelist('caiwu_rijizhang_ksrq');
+	datelist('caiwu_rijizhang_jsrq');
+
+
+	$('#caiwu_rijizhang_search').click(function(event) {
+		var zhuti = $('#caiwu_rijizhang_list').parent();
+		var ksrq = $('#caiwu_rijizhang_ksrq').val();
+		var jsrq = $('#caiwu_rijizhang_jsrq').val();
+		var leibie = $('#caiwu_rijizhang_leibie').val();
+		zhuti.empty();
+
+		zhuti.load('{:url("Caiwu/rijizhang")}?ksrq=' + ksrq + '&jsrq=' + jsrq + '&leibie=' + leibie);
+	});
+
+</script>

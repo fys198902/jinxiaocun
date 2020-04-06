@@ -1,0 +1,167 @@
+<style>
+	.navbar-form{
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.form-group{
+		margin-left: 8px;
+	}
+
+
+</style>
+
+
+<div id="caigou_list_zhuti" style="width: 99%; text-align: right">
+	<div class="navbar-form navbar-right">
+		<div class="form-group">
+			<input type="text" id="caig_list_search_ksrq" style="width: 150px" class="form-control" value="{$ksrq}" placeholder="开始日期">
+		</div>
+		<div class="form-group">
+			<input type="text" id="caig_list_search_jsrq" style="width: 150px" class="form-control" value="{$jsrq}" placeholder="结束日期">
+		</div>
+		<div class="form-group">
+			<input type="text" id="caig_list_search_gongys" style="width: 150px" class="form-control" value="{$gongys}" placeholder="供应商/单据ID">
+		</div>
+		<div class="form-group">
+			<input type="text" id="caig_list_search_pinzhong" style="width: 150px" class="form-control" value="{$pinzhong}" placeholder="品种">
+		</div>
+		<div class="form-group">
+			<input type="text" id="caig_list_search_beizhu" style="width: 150px" class="form-control" value="{$beizhu}" placeholder="备注">
+		</div>
+		<button id="caig_list_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+		<button id='caig_list_del' class="btn btn-warning" style="margin-left: 10px">删除</button>
+		<button  id='caig_list__daoc' class="btn btn-info" style="margin-left: 10px">导出</button>
+
+	</div>
+	
+</div>
+
+
+
+<div id="caiglistdiv" style="width: 99%;overflow-x: auto;">
+	<table class="table table-bordered table-condensed" style="min-width:1280px;">
+		<th style="width: 60px">ID</th>
+		<th style="width: 136px">单据ID</th>
+		<th style="width: 100px">日期</th>
+		<th style="width: 210px">供应商</th>
+		<th style="width: 180px">物料名称</th>
+		<th style="width: 60px">单位</th>
+		<th style="width: 80px">数量</th>
+		<th style="width: 80px">单价</th>
+		<th style="width: 80px">金额</th>
+		<th>备注</th>
+		<th style="width: 80px">制单人</th>
+		{volist name="row" id="vo"}
+			<tr>
+				<td>{$i + ($dangqianye-1)*20}</td>
+				<td class="caigouxtid">{$vo.caig_xt_id} <input type="hidden" class="caigouid" value="{$vo.id}"></td>
+				<td>{$vo.caig_date}</td>
+				<td style="text-align: left">{$vo.gongys_name}-{$vo.gongys_dizhi}</td>
+				<td>{$vo.wuliao_name}</td>
+				<td>{$vo.danw_name}</td>
+				<td>{$vo.shul}</td>
+				<td>{$vo.danj}</td>
+				<td>{$vo.jine}</td>
+				<td>{$vo.beizhu}</td>
+				<td>{$vo.username}</td>
+			</tr>
+		{/volist}
+
+		<tr class="caigou_list" style="text-align: center;border: none">
+			<td colspan="11">
+				<ul class="pagination" style="margin: 0px;padding: 0px">
+				<li><a href="#" id="{$shangyiye}">&laquo;</a></li>
+				{for start="$qishiye" end="$jieshuye"}
+					<li {if $i+1==$dangqianye} class="active" {/if}><a href="#" id="{$i+1}">{$i+1}</a></li>
+				{/for}
+				<li><a href="#" id="{$xiayiye}"><span>&raquo;</span></a></li>
+			</ul>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<script type="text/javascript">
+	datelist('caig_list_search_ksrq');
+	datelist('caig_list_search_jsrq');
+
+	$('#caiglistdiv').css('height',parseFloat($(window).height())-175);
+
+	$('#caiglistdiv .table tr').click(function(event) {
+		$('#caiglistdiv .bgcolor').removeClass('bgcolor');
+		$(this).toggleClass('bgcolor');
+	});
+
+
+	$('#caiglistdiv .table tr').dblclick(function(event) {
+		var caigid = $(this).find('.caigouid').val();
+		var caigxtid = $(this).find('.caigouxtid').text();
+		addtabs('list' + (parseInt($('.nav-tabs').children('li').length)+1),caigxtid + '修改','caig/caig_update?id=' + caigid);
+
+	});
+
+	$('.caigou_list .pagination a').click(function(event) {
+		var id = $(this).attr('id');
+		var zhuti = $('#caiglistdiv').parent();
+		var ksrq = $('#caig_list_search_ksrq').val();
+		var jsrq = $('#caig_list_search_jsrq').val();
+		var gongys = $('#caig_list_search_gongys').val();
+		var pinzhong = $('#caig_list_search_pinzhong').val();
+		var beizhu = $('#caig_list_search_beizhu').val();
+
+		zhuti.empty();
+		zhuti.append('<div class="loading"></div>');
+
+		zhuti.load("{:url('Caig/caig_list')}?page=" + id + '&ksrq=' + ksrq + '&jsrq=' + jsrq + '&gongys=' + gongys + '&pinzhong=' + pinzhong + '&beizhu=' + beizhu, function(){
+			$('.loading').hide();
+		});
+	});
+
+
+	$('#caig_list_del').click(function(event) {
+		var liid = $(this).parent().parent().attr('id');
+		$('#caiglistdiv .bgcolor').each(function(index, el) {
+			var xtid=$(this).find('.caigouxtid').text();
+			var id=$(this).find('.caigouid').val();
+			if(confirm(xtid + "确定要删除吗？")){
+				$.ajax({
+					url: '{:url("Caig/caig_del")}',
+					type: 'post',
+					data: {
+						caig_id: id,
+						caig_xtid: xtid,
+					},
+					success: function(msg){
+						showtz(msg['msg'],'');
+						$('#' + liid).load('{:url("Caig/caig_list")}');
+					}
+				})				
+			}
+		});
+	});
+
+	$('#caig_list_search').click(function(event) {
+		var zhuti = $('#caigou_list_zhuti').parent();
+		var ksrq = $('#caig_list_search_ksrq').val();
+		var jsrq = $('#caig_list_search_jsrq').val();
+		var gongys = $('#caig_list_search_gongys').val();
+		var pinzhong = $('#caig_list_search_pinzhong').val();
+		var beizhu = $('#caig_list_search_beizhu').val();
+		zhuti.empty();
+
+
+		zhuti.load('{:url("Caig/caig_list")}?ksrq=' + ksrq + '&jsrq=' + jsrq + '&gongys=' + gongys + '&pinzhong=' + pinzhong + '&beizhu=' + beizhu);
+	});
+
+
+	$('#caig_list__daoc').click(function(event) {
+		var ksrq = $('#caig_list_search_ksrq').val();
+		var jsrq = $('#caig_list_search_jsrq').val();
+		var gongys = $('#caig_list_search_gongys').val();
+		var pinzhong = $('#caig_list_search_pinzhong').val();
+		var beizhu = $('#caig_list_search_beizhu').val();
+
+		window.open('{:url("Caig/caigoudaochu")}?ksrq=' + ksrq + '&jsrq=' + jsrq + '&gongys=' + gongys + '&pinzhong=' + pinzhong + '&beizhu=' + beizhu);
+	});
+</script>

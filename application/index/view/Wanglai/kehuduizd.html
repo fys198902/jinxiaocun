@@ -1,0 +1,294 @@
+<div id="kehuduizd_zhuti">
+	<div style="margin-top: 10px">
+		<div class="navbar-form navbar-right">
+			<div class="form-group">
+				<input type="text" id="kehuduizd_ksrq" style="width: 150px" value="{$ksrq}" class="form-control" placeholder="开始日期">
+			</div>
+			<div class="form-group">
+				<input type="text" id="kehuduizd_jsrq" style="width: 150px" value="{$jsrq}" class="form-control" placeholder="结束日期">
+			</div>
+			<div class="form-group">
+				<input type="text" id="kehuduizd_kehu" style="width: 180px" value="{$kehu}" class="form-control" placeholder="客户名称">
+				<input type="hidden" id="kehuduizd_kehu_id" value="{$kehuid}">
+			</div>
+			<button id="kehuduizd_search" class="btn btn-primary" style="margin-left: 8px">查询</button>
+			<button id="kehuduizd_dayin" class="btn btn-success" style="margin-left: 8px">打印</button>
+
+		</div>
+
+
+		<div style="width: 99%; margin-left: 8px">
+			<table class="table">
+				<tr>
+					<td>项目</td>
+					<td>金额</td>
+					<td>备注</td>
+				</tr>
+				<tr>
+					<td style="width: 32%">期初余额</td>
+					<td style="width: 32%">{$qichu}</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>本期收款及折扣</td>
+					<td>{$benqi_shishou*-1 + $benqi_zhekou*-1}</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>本期销售额</td>
+					<td>{$benqi_xiaos}</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>期末余额</td>
+					<td>{$qichu - $benqi_shishou - $benqi_zhekou + $benqi_xiaos}</td>
+					<td></td>
+				</tr>
+			</table>
+
+
+			<h4>收款及折扣明细</h4>
+			<table class="table">
+				<tr>
+					<td style="width: 120px">日期</td>
+					<td style="width: 150px">单据ID</td>
+					<td style="width: 80px">收款类别</td>
+					<td style="width: 180px">实收金额</td>
+					<td style="width: 180px">折扣金额</td>
+					<td>摘要</td>
+				</tr>
+
+				{volist name="shoukzhek" id="vo"}
+					{php}$shishou_hej = $shishou_hej - $vo['shishou'];{/php}
+					{php}$zhekou_hej = $zhekou_hej - $vo['zhekou'];{/php}
+
+					<tr>
+						<td>{$vo.fdate}</td>
+						<td>{$vo.shouk_xt_id}</td>
+						<td>{$vo.shoukleibie}</td>
+						<td>{$vo.shishou*-1}</td>
+						<td>{$vo.zhekou*-1}</td>
+						<td>{$vo.zhaiyao}</td>
+					</tr>
+				{/volist}
+
+				<tr>
+					<td>合计</td>
+					<td></td>
+					<td></td>
+					<td>{$shishou_hej}</td>
+					<td>{$zhekou_hej}</td>
+					<td></td>
+				</tr>
+			</table>
+
+
+			<h4>销售明细</h4>
+			<table class="table">
+				<tr>
+					<td style="width: 120px">日期</td>
+					<td style="width: 150px">单据ID</td>
+					<td>品种</td>
+					<td style="width: 80px">单位</td>
+					<td style="width: 100px">数量</td>
+					<td style="width: 100px">单价</td>
+					<td style="width: 100px">金额</td>
+					<td>状态及备注</td>
+				</tr>
+
+				{volist name="xiaoslist" id="vo"}
+					{php}$xiaos_shul = $xiaos_shul + $vo['shul'];{/php}
+					{php}$xiaos_jine = $xiaos_jine + $vo['jine'];{/php}
+
+					<tr>
+						<td>{$vo.xiaos_date}</td>
+						<td>{$vo.xiaos_xt_id}</td>
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.danw_name}</td>
+						<td>{$vo.shul}</td>
+						<td>{$vo.danj}</td>
+						<td>{$vo.jine}</td>
+						<td style="text-align: left">{$vo.beizhu}</td>
+					</tr>
+				{/volist}
+				<tr>
+					<td>合计</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>{$xiaos_shul}</td>
+					<td></td>
+					<td>{$xiaos_jine}</td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="__JS__/Print.js"></script>
+	<div id="print" style="margin-top: 50px;width: 1200px;display: flex;justify-content: row">
+		<style type="text/css">
+			.biaoge input{
+				width: 100%;
+				height: 30px;
+				border: none;
+				text-align: center;
+			}
+
+			.biaoge tr,.biaoge td{
+				border: 1px solid black
+			}
+
+			.biaoge tr{
+				line-height: 30px;
+				height: 30px;
+			}
+
+		</style>
+		<div>
+			<div style="width: 720px; font-size: 20px;">
+				<span style="width: 356px"><b>{$kehu}</b></span>
+				<span style="float: right"><b>{$ksrq}到{$jsrq}</b></span>
+			</div>
+			<table class="biaoge" style="width: 720px">
+				<tr>
+					<td style="width: 150px;border: 1px solid black">物料</td>
+					<td style="width: 80px;border: 1px solid black">单位</td>
+					<td style="width: 90px;border: 1px solid black">数量</td>
+					<td style="width: 100px;border: 1px solid black">开单价</td>
+					<td style="width: 100px;border: 1px solid black">返利</td>
+					<td style="width: 100px;border: 1px solid black">结算价</td>
+					<td style="width: 100px;border: 1px solid black">应收款</td>
+				</tr>
+				{volist name="xiaosgroup_goum" id="vo"}
+					<tr style="padding: 0px">
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.danw_name}</td>
+						<td class="shul">{$vo.xiaol}</td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="kaidanj"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="fanli"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="jiesuanj"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="yingshouk" value="0" /></td>
+					</tr>
+				{/volist}
+				<tr>
+					<td colspan="7">以下为赠酒</td>
+				</tr>
+				{volist name="xiaosgroup_zengs" id="vo"}
+					<tr style="padding: 0px; margin: 0px">
+						<td>{$vo.wuliao_name}</td>
+						<td>{$vo.danw_name}</td>
+						<td class="shul">{$vo.xiaol}</td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="kaidanj"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="fanli"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="jiesuanj"/></td>
+						<td style="padding: 0px; margin: 0px"><input type="text" class="yingshouk" value="0" /></td>
+					</tr>
+				{/volist}
+				<tr>
+					<td colspan="6" style="padding: 0px; margin: 0px"><input type="text"></td>
+					<td style="padding: 0px; margin: 0px"><input type="text" class="yingshouk" value="0"></td>
+				</tr>
+				<tr>
+					<td colspan="6" style="padding: 0px; margin: 0px"><input type="text"></td>
+					<td style="padding: 0px; margin: 0px"><input type="text" class="yingshouk" value="0"></td>
+				</tr>
+				<tr>
+					<td>合计</td>
+					<td colspan="5"></td>
+					<td id='heji'></td>
+				</tr>
+			</table>
+		</div>
+		
+		<div style="margin-top: 20px">
+			<img src="{:url('Getval/erweima')}?size=200&neirong=https://www.xmoj.cn/weixin/index/kehuduizd/ksrq/{$ksrq}/jsrq/{$jsrq}/kehuid/{$kehuid}/kehu/{$kehu}"/>
+			<br/>
+			<span style="margin-left: 20px">{$fdate}</span>
+			<br/>
+			<button class="btn hidden-print" id="duizhangday" style="float: right;margin-right: 20px">打印</button>
+			<br>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	datelist('kehuduizd_ksrq');
+	datelist('kehuduizd_jsrq');
+
+	$('#duizhangday').click(function(){
+		$('#print input').each(function(){
+			var val=$(this).val();
+			$(this).replaceWith(val);
+		})
+		Print('#print');
+	});
+
+	$(".jiesuanj").focus(function(){
+		var zhuti = $(this).parent().parent();
+		var shul = zhuti.find('.shul').text();
+		var kaidanj = zhuti.find('.kaidanj').val();
+		var fanli = zhuti.find('.fanli').val();
+		var jiesuanj = parseFloat((kaidanj == '')?0:kaidanj)-parseFloat((fanli == '')?0:fanli);
+		$(this).val(jiesuanj);
+		zhuti.find('.yingshouk').val(parseFloat(shul)*jiesuanj)
+		var heji=0;
+		$('.yingshouk').each(function(){
+			heji = parseFloat(heji) + parseFloat($(this).val());
+		})
+		$('#heji').text(heji);
+	})
+
+	var objmap_gys={};
+	$("#kehuduizd_kehu").typeahead({
+	    source: function (query, process) {
+	        return $.ajax({
+	            url: '{:url("Getval/getkehu")}',
+	            type: 'post',
+	            data: {kehu: query},
+	            success: function (fdata) {
+	        	    var names = [];
+	                $.each(fdata,function(index,ele){
+	                	objmap_gys[ele.name]=ele.id;
+	                    names.push(ele.name);
+	                });
+	                process(names);
+	            }
+	        });
+	    },
+	    items: 5,
+	    showHintOnFocus: true,
+	    afterSelect: function (item) {
+		    $('#kehuduizd_kehu_id').val(objmap_gys[item]);
+		},
+	    delay: 400,
+	});
+
+
+	$('#kehuduizd_search').click(function(event) {
+		var zhut = $('#kehuduizd_zhuti').parent();
+		var ksrq = $('#kehuduizd_ksrq').val();
+		var jsrq = $('#kehuduizd_jsrq').val();
+		var kehu = $('#kehuduizd_kehu').val();
+		var kehuid = $('#kehuduizd_kehu_id').val();
+
+		zhut.empty();
+
+		zhut.load('{:url("wanglai/kehuduizd")}',{
+			ksrq: ksrq,
+			jsrq: jsrq,
+			kehu: kehu,
+			kehuid: kehuid
+		});
+	});
+
+
+	$('#kehuduizd_dayin').click(function(event) {
+		var zhut = $('#kehuduizd_zhuti').parent();
+		var ksrq = $('#kehuduizd_ksrq').val();
+		var jsrq = $('#kehuduizd_jsrq').val();
+		var kehu = $('#kehuduizd_kehu').val();
+		var kehuid = $('#kehuduizd_kehu_id').val();
+		window.open('{:url("wanglai/kehu_duizhangd_dayin")}?ksrq=' + ksrq + "&jsrq=" + jsrq + "&kehuid="  + kehuid + "&kehu=" + kehu ,"客户对账单打印");
+	});
+</script>
